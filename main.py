@@ -1,12 +1,14 @@
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-import time
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
-app = FastAPI()
+app = FastAPI(
+    title="Platform AI Service",
+    description="This service provides apis to interact with the platform AI. Currently it only supports a general chatbot, There are yet to come",
+)
 
 
 llm = ChatOpenAI(
@@ -16,8 +18,6 @@ llm = ChatOpenAI(
     timeout=None,
     max_retries=2,
 )
-
-
 
 
 prompt = ChatPromptTemplate.from_messages(
@@ -34,15 +34,18 @@ prompt = ChatPromptTemplate.from_messages(
 chain = prompt | llm
 
 
-@app.get("/model")
+@app.get(
+    "/general",
+    summary="A simple chatbot to handle question and conversions for platform members",
+)
 async def stream_response(context: str, user_input: str):
-    async def model_response():
-        # Simulate processing context and user input
-        yield f"Processing context: {context}\n"
-        time.sleep(1)  # Simulate processing delay
+    """
+    Ask the model a question based on the context and user input
+    """
 
+    async def model_response():
+        yield f"Processing context: {context}\n"
         yield f"Processing user input: {user_input}\n"
-        time.sleep(1)  # Simulate processing delay
 
         # Simulate response generation
         async for i in chain.astream(
@@ -53,5 +56,4 @@ async def stream_response(context: str, user_input: str):
         ):
             yield i.content
 
-    return StreamingResponse(model_response(), media_type="text/plain")
-
+    return StreamingResponse(model_response(), media_type="text/plain")  # type: ignore
