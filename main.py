@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -38,7 +39,12 @@ chain = prompt | llm
     "/general",
     summary="A simple chatbot to handle question and conversions for platform members",
 )
-async def stream_response(context: str, user_input: str):
+async def stream_response(
+    context: Optional[str] = "Helpful assistant with the platform",
+    user_input: Optional[
+        str
+    ] = "What is the best way to get started with the platform?",
+):
     """
     Ask the model a question based on the context and user input
     """
